@@ -67,6 +67,7 @@
     <Compile Include="Memory\Signature.cs" />
     <Compile Include="Memory\Protection.cs" />
     <Compile Include="Memory\Regions.cs" />
+    <Compile Include="Memory\Scanner.cs" />
     <Compile Include="Native\Enumerations.cs" />
     <Compile Include="Native\Imports.cs" />
     <Compile Include="Native\Methods.cs" />
