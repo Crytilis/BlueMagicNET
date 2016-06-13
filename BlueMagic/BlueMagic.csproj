@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="MarshalType.cs" />
     <Compile Include="Memory\IO.cs" />
+    <Compile Include="Memory\Signature.cs" />
     <Compile Include="Memory\Protection.cs" />
     <Compile Include="Memory\Regions.cs" />
     <Compile Include="Native\Enumerations.cs" />
@@ -74,7 +75,7 @@
     <Compile Include="SafeMemoryHandle.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
