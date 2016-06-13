@@ -62,7 +62,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MarshalType.cs" />
+    <Compile Include="Memory\IO.cs" />
+    <Compile Include="Memory\Protection.cs" />
+    <Compile Include="Native\Enumerations.cs" />
+    <Compile Include="Native\Imports.cs" />
+    <Compile Include="Native\Methods.cs" />
+    <Compile Include="Native\Structures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SafeMemoryHandle.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
