@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlueMagic.Native
 {
-    public static class Methods
+    public static unsafe class Methods
     {
         public static SafeMemoryHandle OpenProcess(int pId, AccessFlags accessFlags = AccessFlags.PROCESS_ALL_ACCESS)
         {
@@ -51,39 +51,91 @@ namespace BlueMagic.Native
             return true;
         }
 
-        public static IntPtr ReadProcessMemory(SafeMemoryHandle processHandle, IntPtr address, [Out] byte[] buffer, IntPtr sizeBytes)
+        public static int ReadProcessMemory(SafeMemoryHandle processHandle, IntPtr address, [Out] byte[] buffer, int size)
         {
-            IntPtr bytesRead;
-            if (!Imports.ReadProcessMemory(processHandle, address, buffer, sizeBytes, out bytesRead))
+            int bytesRead = 0;
+            if (!Imports.ReadProcessMemory(processHandle, address, buffer, size, out bytesRead))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to read memory from 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), sizeBytes));
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
             return bytesRead;
         }
 
-        public static IntPtr WriteProcessMemory(SafeMemoryHandle processHandle, IntPtr address, [Out] byte[] buffer, IntPtr sizeBytes)
+        public static int WriteProcessMemory(SafeMemoryHandle processHandle, IntPtr address, [Out] byte[] buffer, int size)
         {
-            IntPtr bytesWritten;
-            if (!Imports.WriteProcessMemory(processHandle, address, buffer, sizeBytes, out bytesWritten))
+            int bytesWritten = 0;
+            if (!Imports.WriteProcessMemory(processHandle, address, buffer, size, out bytesWritten))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to write memory at 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), sizeBytes));
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
             return bytesWritten;
         }
 
-        public static MemoryProtectionType ChangeMemoryProtection(SafeMemoryHandle processHandle, IntPtr address, IntPtr sizeBytes, MemoryProtectionType newProtect)
+        public static IntPtr Allocate([Optional] IntPtr address, int size, MemoryProtectionType protect)
+        {
+            IntPtr ret = Imports.VirtualAlloc(address, size, MemoryAllocationState.MEM_COMMIT, protect);
+            if (ret.Equals(0))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable allocate memory at 0x{1}[Size: {2}]",
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+            return ret;
+        }
+
+        public static IntPtr Allocate(SafeMemoryHandle processHandle, [Optional] IntPtr address, int size, MemoryProtectionType protect)
+        {
+            IntPtr ret = Imports.VirtualAllocEx(processHandle, address, size, MemoryAllocationState.MEM_COMMIT, protect);
+            if (ret.Equals(0))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable allocate memory to process handle 0x{1} at 0x{2}[Size: {3}]",
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
+            return ret;
+        }
+
+        public static bool Free(IntPtr address, int size, MemoryFreeType free)
+        {
+            if (!Imports.VirtualFree(address, size, free))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable free memory at 0x{1}[Size: {2}]",
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+            return true;
+        }
+
+        public static bool Free(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryFreeType free)
+        {
+            if (!Imports.VirtualFreeEx(processHandle, address, size, free))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable free memory from process handle 0x{1} at 0x{2}[Size: {3}]",
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
+            return true;
+        }
+
+        public static MemoryProtectionType ChangeMemoryProtection(IntPtr address, int size, MemoryProtectionType newProtect)
         {
             MemoryProtectionType oldProtect;
-            if (!Imports.VirtualProtectEx(processHandle, address, sizeBytes, newProtect, out oldProtect))
-                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to change memory protection of process handle 0x{1} at 0x{2}[Size: {3}] to {4}",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), sizeBytes, newProtect.ToString("X")));
+            if (!Imports.VirtualProtect(address, size, newProtect, out oldProtect))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to change memory protection at 0x{1}[Size: {2}] to {3}",
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size, newProtect.ToString("X")));
             return oldProtect;
         }
 
-        public static MemoryBasicInformation Query(SafeMemoryHandle processHandle, IntPtr address, IntPtr sizeBytes)
+        public static MemoryProtectionType ChangeMemoryProtection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType newProtect)
+        {
+            MemoryProtectionType oldProtect;
+            if (!Imports.VirtualProtectEx(processHandle, address, size, newProtect, out oldProtect))
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to change memory protection of process handle 0x{1} at 0x{2}[Size: {3}] to {4}",
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size, newProtect.ToString("X")));
+            return oldProtect;
+        }
+
+        public static MemoryBasicInformation Query(IntPtr address, int size)
         {
             MemoryBasicInformation memInfo;
-            if (Imports.VirtualQueryEx(processHandle, address, out memInfo, sizeBytes) == 0)
+            if (Imports.VirtualQuery(address, out memInfo, size) == 0)
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to retrieve memory information from 0x{1}[Size: {2}]",
+                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+            return memInfo;
+        }
+
+        public static MemoryBasicInformation Query(SafeMemoryHandle processHandle, IntPtr address, int size)
+        {
+            MemoryBasicInformation memInfo;
+            if (Imports.VirtualQueryEx(processHandle, address, out memInfo, size) == 0)
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to retrieve memory information of process handle 0x{1} from 0x{2}[Size: {3}]",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), sizeBytes));
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
             return memInfo;
         }
     }

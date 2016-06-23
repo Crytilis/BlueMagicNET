@@ -34,9 +34,9 @@ namespace BlueMagic.Memory
             return results;
         }
 
-        public static List<IntPtr> ScanForGeneric<T>(T value, byte[] buffer)
+        public static List<IntPtr> ScanForGeneric<T>(T value, byte[] buffer) where T : struct
         {
-            return ScanForBytes(MarshalType<T>.GenericTypeToBytes(value), buffer);
+            return ScanForBytes(TypeConverter.GenericTypeToBytes(value), buffer);
         }
 
         public static List<IntPtr> ScanForSignature(Signature signature, byte[] buffer)
@@ -76,17 +76,17 @@ namespace BlueMagic.Memory
         public static List<IntPtr> ScanRegionForBytes(SafeMemoryHandle processHandle, byte[] bytes, Native.MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForBytes(bytes, IO.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForBytes(bytes, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, Native.MemoryBasicInformation region)
+        public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, Native.MemoryBasicInformation region) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForGeneric(value, IO.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForGeneric(value, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -96,7 +96,7 @@ namespace BlueMagic.Memory
         public static List<IntPtr> ScanRegionForSignature(SafeMemoryHandle processHandle, Signature signature, Native.MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForSignature(signature, IO.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForSignature(signature, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -112,7 +112,7 @@ namespace BlueMagic.Memory
             return results;
         }
 
-        public static List<IntPtr> ScanRegionsForGeneric<T>(SafeMemoryHandle processHandle, T value, List<Native.MemoryBasicInformation> regions)
+        public static List<IntPtr> ScanRegionsForGeneric<T>(SafeMemoryHandle processHandle, T value, List<Native.MemoryBasicInformation> regions) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
             foreach (Native.MemoryBasicInformation region in regions)
@@ -135,7 +135,7 @@ namespace BlueMagic.Memory
             return ScanRegionsForBytes(processHandle, bytes, Regions.Load(process, processHandle, module));
         }
 
-        public static List<IntPtr> ScanModuleForGeneric<T>(Process process, SafeMemoryHandle processHandle, T value, ProcessModule module)
+        public static List<IntPtr> ScanModuleForGeneric<T>(Process process, SafeMemoryHandle processHandle, T value, ProcessModule module) where T : struct
         {
             return ScanRegionsForGeneric(processHandle, value, Regions.Load(process, processHandle, module));
         }
@@ -155,7 +155,7 @@ namespace BlueMagic.Memory
             return results;
         }
 
-        public static List<IntPtr> ScanAllModulesForGeneric<T>(Process process, SafeMemoryHandle processHandle, T value)
+        public static List<IntPtr> ScanAllModulesForGeneric<T>(Process process, SafeMemoryHandle processHandle, T value) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
             foreach (ProcessModule module in process.Modules)
@@ -177,15 +177,15 @@ namespace BlueMagic.Memory
 
         public static IntPtr RescanForBytes(SafeMemoryHandle processHandle, byte[] bytes, IntPtr address)
         {
-            if (IO.ReadBytes(processHandle, address, new IntPtr(bytes.Length)) == bytes)
+            if (Literate.ReadBytes(processHandle, address, bytes.Length) == bytes)
                 return address;
 
             return IntPtr.Zero;
         }
 
-        public static IntPtr RescanForGeneric<T>(SafeMemoryHandle processHandle, T value, IntPtr address)
+        public static IntPtr RescanForGeneric<T>(SafeMemoryHandle processHandle, T value, IntPtr address) where T : struct
         {
-            return RescanForBytes(processHandle, MarshalType<T>.GenericTypeToBytes(value), address);
+            return RescanForBytes(processHandle, TypeConverter.GenericTypeToBytes(value), address);
         }
 
         public static IntPtr RescanForSignature(SafeMemoryHandle processHandle, Signature signature, IntPtr address)
@@ -193,7 +193,7 @@ namespace BlueMagic.Memory
             if (signature.Bytes != null)
                 return RescanForBytes(processHandle, signature.Bytes, address);
 
-            byte[] buffer = IO.ReadBytes(processHandle, address, new IntPtr(signature.String.Length / 2));
+            byte[] buffer = Literate.ReadBytes(processHandle, address, signature.String.Length / 2);
             string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
             int bufferLength = bufferString.Length;
 
@@ -220,7 +220,7 @@ namespace BlueMagic.Memory
             return results;
         }
 
-        public static List<IntPtr> RescanForGeneric<T>(SafeMemoryHandle processHandle, T value, List<IntPtr> addresses)
+        public static List<IntPtr> RescanForGeneric<T>(SafeMemoryHandle processHandle, T value, List<IntPtr> addresses) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
             foreach (IntPtr address in addresses)

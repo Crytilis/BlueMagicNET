@@ -13,19 +13,19 @@ namespace BlueMagic.Memory
 
             for (; moduleIndex < endModule; ++moduleIndex)
             {
-                IntPtr start = processModules[moduleIndex].BaseAddress;
-                IntPtr end = moduleIndex + 1 > processModules.Length - 1 ? new IntPtr(processModules[moduleIndex].ModuleMemorySize + 1) : processModules[moduleIndex + 1].BaseAddress;
-                IntPtr seek = start;
+                long start = processModules[moduleIndex].BaseAddress.ToInt64();
+                long end = moduleIndex + 1 > processModules.Length - 1 ? processModules[moduleIndex].ModuleMemorySize + 1 : processModules[moduleIndex + 1].BaseAddress.ToInt64();
+                long seek = start;
 
                 do
                 {
-                    Native.MemoryBasicInformation region = Native.Methods.Query(processHandle, seek, MarshalType<Native.MemoryBasicInformation>.Size);
+                    Native.MemoryBasicInformation region = Native.Methods.Query(processHandle, new IntPtr(seek), MarshalType<Native.MemoryBasicInformation>.Size);
                     if ((region.State & Native.MemoryAllocationState.MEM_COMMIT) != 0 && (region.Protect & (Native.MemoryProtectionType)0x701) == 0)
                         regions.Add(region);
 
-                    seek = new IntPtr(region.BaseAddress.ToInt64() + region.RegionSize.ToInt64());
+                    seek = region.BaseAddress.ToInt64() + region.RegionSize;
                 }
-                while (seek.ToInt64() < end.ToInt64());
+                while (seek < end);
             }
 
             return regions;

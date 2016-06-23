@@ -39,8 +39,8 @@ namespace BlueMagic.Native
             SafeMemoryHandle hProcess,
             IntPtr dwAddress,
             [Out] byte[] lpBuffer,
-            IntPtr nSize,
-            out IntPtr lpBytesRead);
+            int nSize,
+            out int lpBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -48,43 +48,69 @@ namespace BlueMagic.Native
             SafeMemoryHandle hProcess,
             IntPtr dwAddress,
             [Out] byte[] lpBuffer,
-            IntPtr nSize,
-            out IntPtr iBytesWritten);
+            int nSize,
+            out int iBytesWritten);
 
         [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
         internal static extern void MoveMemory(
             void* destination,
             void* source,
-            IntPtr nSize);
+            int nSize);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern IntPtr VirtualAlloc(
+            [Optional] IntPtr lpAddress,
+            int nSize,
+            MemoryAllocationState dwAllocationType,
+            MemoryProtectionType dwProtect);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern IntPtr VirtualAllocEx(
             SafeMemoryHandle hProcess,
-            IntPtr lpAddress,
-            IntPtr nSize,
-            MemoryAllocationType dwAllocationType,
+            [Optional] IntPtr lpAddress,
+            int nSize,
+            MemoryAllocationState dwAllocationType,
             MemoryProtectionType dwProtect);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool VirtualFree(
+            IntPtr lpAddress,
+            int nSize,
+            MemoryFreeType dwFreeType);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern bool VirtualFreeEx(
             SafeMemoryHandle hProcess,
             IntPtr lpAddress,
-            IntPtr nSize,
+            int nSize,
             MemoryFreeType dwFreeType);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool VirtualProtect(
+            IntPtr lpAddress,
+            int nSize,
+            MemoryProtectionType flNewProtect,
+            out MemoryProtectionType lpflOldProtect);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool VirtualProtectEx(
+            SafeMemoryHandle hProcess,
+            IntPtr lpAddress,
+            int nSize,
+            MemoryProtectionType flNewProtect,
+            out MemoryProtectionType lpflOldProtect);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern int VirtualQuery(
+            IntPtr lpAddress,
+            out MemoryBasicInformation lpBuffer,
+            int dwLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern int VirtualQueryEx(
             SafeMemoryHandle hProcess,
             IntPtr lpAddress,
             out MemoryBasicInformation lpBuffer,
-            IntPtr dwLength);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool VirtualProtectEx(
-            SafeMemoryHandle hProcess,
-            IntPtr lpAddress,
-            IntPtr nSize,
-            MemoryProtectionType flNewProtect,
-            out MemoryProtectionType lpflOldProtect);
+            int dwLength);
     }
 }

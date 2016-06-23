@@ -41,6 +41,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>..\bin\x86\Release\</OutputPath>
@@ -50,6 +51,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -63,9 +65,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarshalType.cs" />
-    <Compile Include="Memory\IO.cs" />
+    <Compile Include="Memory\Manager.cs" />
     <Compile Include="Memory\Signature.cs" />
-    <Compile Include="Memory\Protection.cs" />
+    <Compile Include="Memory\Literate.cs" />
+    <Compile Include="Memory\ManagedAllocation.cs" />
+    <Compile Include="Memory\ManagedProtection.cs" />
     <Compile Include="Memory\Regions.cs" />
     <Compile Include="Memory\Scanner.cs" />
     <Compile Include="Native\Enumerations.cs" />
@@ -74,6 +78,7 @@
     <Compile Include="Native\Structures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeMemoryHandle.cs" />
+    <Compile Include="TypeConverter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

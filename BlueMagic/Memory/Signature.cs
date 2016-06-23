@@ -18,7 +18,6 @@ namespace BlueMagic.Memory
             foreach (char c in String)
             {
                 if ((c < '0' || c > '9') &&
-                    (c < 'a' || c > 'f') &&
                     (c < 'A' || c > 'F') &&
                     (c != '?'))
                     throw new ArgumentException("Signature contains invalid character(s).");
@@ -40,7 +39,7 @@ namespace BlueMagic.Memory
             Dispose();
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
             GC.SuppressFinalize(this);
         }
