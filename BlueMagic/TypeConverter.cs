@@ -102,8 +102,17 @@ namespace BlueMagic
                     }
 
                     IntPtr ptr = Marshal.AllocHGlobal(size);
-                    Marshal.StructureToPtr(generic, ptr, false);
-                    Marshal.Copy(ptr, bytes, 0, size);
+
+                    try
+                    {
+                        Marshal.StructureToPtr(generic, ptr, false);
+                        Marshal.Copy(ptr, bytes, 0, size);
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(ptr);
+                    }
+
                     return bytes;
                 case TypeCode.Boolean:
                     return BitConverter.GetBytes((bool)(object)generic);
@@ -153,10 +162,10 @@ namespace BlueMagic
                     }
 
                     int size = MarshalType<T>.Size;
+                    T generic = default(T);
 
                     if (!MarshalType<T>.TypeRequiresMarshal)
                     {
-                        T generic = default(T);
                         void* genericPtr = MarshalType<T>.GetPointer(ref generic);
                         fixed (byte* bytesPtr = bytes)
                         {
@@ -166,8 +175,18 @@ namespace BlueMagic
                     }
 
                     IntPtr ptr = Marshal.AllocHGlobal(size);
-                    Marshal.Copy(bytes, 0, ptr, size);
-                    return (T)Marshal.PtrToStructure(ptr, typeof(T));
+
+                    try
+                    {
+                        Marshal.Copy(bytes, 0, ptr, size);
+                        generic = (T)Marshal.PtrToStructure(ptr, typeof(T));
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(ptr);
+                    }
+
+                    return generic;
                 case TypeCode.Boolean:
                     return (T)(object)BitConverter.ToBoolean(bytes, 0);
                 case TypeCode.SByte:

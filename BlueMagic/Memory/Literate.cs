@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace BlueMagic.Memory
@@ -22,8 +21,9 @@ namespace BlueMagic.Memory
         {
             byte[] buffer = ReadBytes(processHandle, address, size);
             string s = encoding.GetString(buffer);
-            if (s.IndexOf('\0') != -1)
-                s = s.Remove(s.IndexOf('\0'));
+            int i = s.IndexOf('\0');
+            if (i != -1)
+                s = s.Remove(i);
             return s;
         }
 
@@ -35,19 +35,6 @@ namespace BlueMagic.Memory
 
         public static bool Write<T>(SafeMemoryHandle processHandle, IntPtr address, T value) where T : struct
         {
-            byte[] bytes = TypeConverter.GenericTypeToBytes(value);
-            int size = MarshalType<T>.Size;
-            IntPtr hObj = Marshal.AllocHGlobal(MarshalType<T>.Size);
-            try
-            {
-                Marshal.StructureToPtr(value, hObj, false);
-                bytes = new byte[size];
-                Marshal.Copy(hObj, bytes, 0, size);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(hObj);
-            }
             return WriteBytes(processHandle, address, TypeConverter.GenericTypeToBytes(value));
         }
 
