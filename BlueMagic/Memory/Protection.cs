@@ -3,7 +3,7 @@ using System;
 
 namespace BlueMagic.Memory
 {
-    public class ManagedProtection : IDisposable
+    public class Protection : IDisposable
     {
         public static SafeMemoryHandle ProcessHandle { get; private set; }
         public static IntPtr Address { get; private set; }
@@ -11,7 +11,7 @@ namespace BlueMagic.Memory
         public static MemoryProtectionType OldProtection { get; private set; }
         public static MemoryProtectionType NewProtection { get; private set; }
 
-        public ManagedProtection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType protection = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
+        public Protection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType protection = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             ProcessHandle = processHandle;
             Address = address;
@@ -20,7 +20,7 @@ namespace BlueMagic.Memory
             OldProtection = Methods.ChangeMemoryProtection(ProcessHandle, Address, Size, NewProtection);
         }
 
-        ~ManagedProtection()
+        ~Protection()
         {
             Dispose();
         }

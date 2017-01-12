@@ -3,27 +3,27 @@ using System.Runtime.InteropServices;
 
 namespace BlueMagic.Memory
 {
-    public class ManagedAllocation : IDisposable
+    public class RemoteAllocation : IDisposable
     {
         public int Size { get; private set; }
         public SafeMemoryHandle ProcessHandle { get; private set; }
         public IntPtr AllocationBase { get; private set; }
 
-        public ManagedAllocation(int size, [Optional] IntPtr address)
+        public RemoteAllocation(int size, [Optional] IntPtr address)
         {
             Size = size;
             ProcessHandle = null;
             AllocationBase = Manager.Allocate(Size, address);
         }
 
-        public ManagedAllocation(int size, SafeMemoryHandle processHandle, [Optional] IntPtr address)
+        public RemoteAllocation(int size, SafeMemoryHandle processHandle, [Optional] IntPtr address)
         {
             Size = size;
             ProcessHandle = processHandle;
             AllocationBase = Manager.Allocate(Size, ProcessHandle, address);
         }
 
-        ~ManagedAllocation()
+        ~RemoteAllocation()
         {
             Dispose();
         }
@@ -35,6 +35,8 @@ namespace BlueMagic.Memory
             else
                 Manager.Free(ProcessHandle, AllocationBase);
 
+            ProcessHandle = null;
+            AllocationBase = IntPtr.Zero;
             GC.SuppressFinalize(this);
         }
     }
