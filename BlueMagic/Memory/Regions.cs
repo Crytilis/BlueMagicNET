@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlueMagic.Native;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,9 +8,9 @@ namespace BlueMagic.Memory
 {
     public static class Regions
     {
-        private static List<Native.MemoryBasicInformation> Scan(SafeMemoryHandle processHandle, ProcessModule[] processModules, int moduleIndex, int endModule)
+        private static List<MemoryBasicInformation> Scan(SafeMemoryHandle processHandle, ProcessModule[] processModules, int moduleIndex, int endModule)
         {
-            List<Native.MemoryBasicInformation> regions = new List<Native.MemoryBasicInformation>();
+            List<MemoryBasicInformation> regions = new List<MemoryBasicInformation>();
 
             for (; moduleIndex < endModule; ++moduleIndex)
             {
@@ -19,8 +20,8 @@ namespace BlueMagic.Memory
 
                 do
                 {
-                    Native.MemoryBasicInformation region = Native.Methods.Query(processHandle, new IntPtr(seek), MarshalType<Native.MemoryBasicInformation>.Size);
-                    if ((region.State & Native.MemoryAllocationState.MEM_COMMIT) != 0 && (region.Protect & (Native.MemoryProtectionType)0x701) == 0)
+                    MemoryBasicInformation region = Methods.Query(processHandle, new IntPtr(seek), MarshalType<MemoryBasicInformation>.Size);
+                    if ((region.State & MemoryAllocationState.MEM_COMMIT) != 0 && (region.Protect & (MemoryProtectionType)0x701) == 0)
                         regions.Add(region);
 
                     seek = region.BaseAddress.ToInt64() + region.RegionSize;
@@ -31,19 +32,19 @@ namespace BlueMagic.Memory
             return regions;
         }
 
-        private static List<Native.MemoryBasicInformation> ScanAll(SafeMemoryHandle processHandle, ProcessModule[] processModules)
+        private static List<MemoryBasicInformation> ScanAll(SafeMemoryHandle processHandle, ProcessModule[] processModules)
         {
             return Scan(processHandle, processModules, 0, processModules.Length);
         }
 
-        public static List<Native.MemoryBasicInformation> Load(Process process, SafeMemoryHandle processHandle, ProcessModule processModule)
+        public static List<MemoryBasicInformation> Load(Process process, SafeMemoryHandle processHandle, ProcessModule processModule)
         {
             ProcessModule[] ProcessModules = GetProcessModules(process);
             int i = Array.FindIndex(ProcessModules, m => m.ModuleName == processModule.ModuleName);
             return Scan(processHandle, ProcessModules, i, i + 1);
         }
 
-        public static List<Native.MemoryBasicInformation> LoadAll(Process process, SafeMemoryHandle processHandle)
+        public static List<MemoryBasicInformation> LoadAll(Process process, SafeMemoryHandle processHandle)
         {
             ProcessModule[] ProcessModules = GetProcessModules(process);
             return ScanAll(processHandle, ProcessModules);

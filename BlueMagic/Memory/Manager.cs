@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlueMagic.Native;
+using System;
 using System.Runtime.InteropServices;
 
 namespace BlueMagic.Memory
@@ -7,27 +8,27 @@ namespace BlueMagic.Memory
     {
         public static IntPtr Allocate(int size, [Optional] IntPtr address)
         {
-            return Native.Methods.Allocate(address, size, Native.MemoryProtectionType.PAGE_EXECUTE_READWRITE);
+            return Methods.Allocate(address, size, MemoryProtectionType.PAGE_EXECUTE_READWRITE);
         }
 
         public static IntPtr Allocate(int size, SafeMemoryHandle processHandle, [Optional] IntPtr address)
         {
-            return Native.Methods.Allocate(processHandle, address, size, Native.MemoryProtectionType.PAGE_EXECUTE_READWRITE);
+            return Methods.Allocate(processHandle, address, size, MemoryProtectionType.PAGE_EXECUTE_READWRITE);
         }
 
         public static void Free(IntPtr address)
         {
-            Native.Methods.Free(address, 0, Native.MemoryFreeType.MEM_RELEASE);
+            Methods.Free(address, 0, MemoryFreeType.MEM_RELEASE);
         }
 
         public static void Free(SafeMemoryHandle processHandle, IntPtr address)
         {
-            Native.Methods.Free(processHandle, address, 0, Native.MemoryFreeType.MEM_RELEASE);
+            Methods.Free(processHandle, address, 0, MemoryFreeType.MEM_RELEASE);
         }
 
         public static unsafe void Copy(void* destination, void* source, int size)
         {
-            Native.Imports.MoveMemory(destination, source, size);
+            Imports.MoveMemory(destination, source, size);
         }
     }
 }

@@ -1,3 +1,4 @@
+using BlueMagic.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,58 +74,58 @@ namespace BlueMagic.Memory
             return results;
         }
 
-        public static List<IntPtr> ScanRegionForBytes(SafeMemoryHandle processHandle, byte[] bytes, Native.MemoryBasicInformation region)
+        public static List<IntPtr> ScanRegionForBytes(SafeMemoryHandle processHandle, byte[] bytes, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForBytes(bytes, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForBytes(bytes, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, Native.MemoryBasicInformation region) where T : struct
+        public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, MemoryBasicInformation region) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForGeneric(value, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForGeneric(value, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionForSignature(SafeMemoryHandle processHandle, Signature signature, Native.MemoryBasicInformation region)
+        public static List<IntPtr> ScanRegionForSignature(SafeMemoryHandle processHandle, Signature signature, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForSignature(signature, Literate.ReadBytes(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForSignature(signature, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionsForBytes(SafeMemoryHandle processHandle, byte[] bytes, List<Native.MemoryBasicInformation> regions)
+        public static List<IntPtr> ScanRegionsForBytes(SafeMemoryHandle processHandle, byte[] bytes, List<MemoryBasicInformation> regions)
         {
             List<IntPtr> results = new List<IntPtr>();
-            foreach (Native.MemoryBasicInformation region in regions)
+            foreach (MemoryBasicInformation region in regions)
                 results.AddRange(ScanRegionForBytes(processHandle, bytes, region));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionsForGeneric<T>(SafeMemoryHandle processHandle, T value, List<Native.MemoryBasicInformation> regions) where T : struct
+        public static List<IntPtr> ScanRegionsForGeneric<T>(SafeMemoryHandle processHandle, T value, List<MemoryBasicInformation> regions) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
-            foreach (Native.MemoryBasicInformation region in regions)
+            foreach (MemoryBasicInformation region in regions)
                 results.AddRange(ScanRegionForGeneric(processHandle, value, region));
 
             return results;
         }
 
-        public static List<IntPtr> ScanRegionsForSignature(SafeMemoryHandle processHandle, Signature signature, List<Native.MemoryBasicInformation> regions)
+        public static List<IntPtr> ScanRegionsForSignature(SafeMemoryHandle processHandle, Signature signature, List<MemoryBasicInformation> regions)
         {
             List<IntPtr> results = new List<IntPtr>();
-            foreach (Native.MemoryBasicInformation region in regions)
+            foreach (MemoryBasicInformation region in regions)
                 results.AddRange(ScanRegionForSignature(processHandle, signature, region));
 
             return results;
@@ -177,7 +178,7 @@ namespace BlueMagic.Memory
 
         public static IntPtr RescanForBytes(SafeMemoryHandle processHandle, byte[] bytes, IntPtr address)
         {
-            if (Literate.ReadBytes(processHandle, address, bytes.Length) == bytes)
+            if (Literate.Read(processHandle, address, bytes.Length) == bytes)
                 return address;
 
             return IntPtr.Zero;
@@ -193,7 +194,7 @@ namespace BlueMagic.Memory
             if (signature.Bytes != null)
                 return RescanForBytes(processHandle, signature.Bytes, address);
 
-            byte[] buffer = Literate.ReadBytes(processHandle, address, signature.String.Length / 2);
+            byte[] buffer = Literate.Read(processHandle, address, signature.String.Length / 2);
             string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
             int bufferLength = bufferString.Length;
 

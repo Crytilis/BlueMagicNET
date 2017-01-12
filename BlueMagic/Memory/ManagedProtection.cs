@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlueMagic.Native;
+using System;
 
 namespace BlueMagic.Memory
 {
@@ -7,16 +8,16 @@ namespace BlueMagic.Memory
         public static SafeMemoryHandle ProcessHandle { get; private set; }
         public static IntPtr Address { get; private set; }
         public static int Size { get; private set; }
-        public static Native.MemoryProtectionType OldProtection { get; private set; }
-        public static Native.MemoryProtectionType NewProtection { get; private set; }
+        public static MemoryProtectionType OldProtection { get; private set; }
+        public static MemoryProtectionType NewProtection { get; private set; }
 
-        public ManagedProtection(SafeMemoryHandle processHandle, IntPtr address, int size, Native.MemoryProtectionType protection = Native.MemoryProtectionType.PAGE_EXECUTE_READWRITE)
+        public ManagedProtection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType protection = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             ProcessHandle = processHandle;
             Address = address;
             Size = size;
             NewProtection = protection;
-            OldProtection = Native.Methods.ChangeMemoryProtection(ProcessHandle, Address, Size, NewProtection);
+            OldProtection = Methods.ChangeMemoryProtection(ProcessHandle, Address, Size, NewProtection);
         }
 
         ~ManagedProtection()
@@ -26,7 +27,7 @@ namespace BlueMagic.Memory
 
         public void Dispose()
         {
-            Native.Methods.ChangeMemoryProtection(ProcessHandle, Address, Size, OldProtection);
+            Methods.ChangeMemoryProtection(ProcessHandle, Address, Size, OldProtection);
             GC.SuppressFinalize(this);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlueMagic.Native;
+using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security;
 using System.Security.Permissions;
@@ -23,7 +24,7 @@ namespace BlueMagic
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         protected override bool ReleaseHandle()
         {
-            return handle != IntPtr.Zero && Native.Imports.CloseHandle(handle);
+            return handle != IntPtr.Zero && Imports.CloseHandle(handle);
         }
     }
 }
