@@ -6,28 +6,6 @@ namespace BlueMagic
 {
     public static unsafe class TypeConverter
     {
-        public static void* GenericTypeToPointer<T>(T generic) where T : struct
-        {
-            switch (MarshalType<T>.TypeCode)
-            {
-                case TypeCode.Object:
-                case TypeCode.Boolean:
-                case TypeCode.SByte:
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.UInt16:
-                case TypeCode.Int32:
-                case TypeCode.UInt32:
-                case TypeCode.Int64:
-                case TypeCode.UInt64:
-                case TypeCode.Single:
-                case TypeCode.Double:
-                    return MarshalType<T>.GetPointer(ref generic);
-                default:
-                    throw new ArgumentException("Unsupported Type");
-            }
-        }
-
         public static T PointerToGenericType<T>(IntPtr pointer) where T : struct
         {
             switch (MarshalType<T>.TypeCode)
@@ -35,16 +13,7 @@ namespace BlueMagic
                 case TypeCode.Object:
                     if (MarshalType<T>.IsIntPtr)
                         return (T)(object)*(IntPtr*)pointer;
-
-                    if (!MarshalType<T>.TypeRequiresMarshal)
-                    {
-                        T generic = default(T);
-                        void* genericPtr = MarshalType<T>.GetPointer(ref generic);
-                        Manager.Copy(genericPtr, pointer.ToPointer(), MarshalType<T>.Size);
-                        return generic;
-                    }
-
-                    return (T)Marshal.PtrToStructure(pointer, typeof(T));
+                    break;
                 case TypeCode.Boolean:
                     return (T)(object)*(bool*)pointer;
                 case TypeCode.SByte:
@@ -67,18 +36,26 @@ namespace BlueMagic
                     return (T)(object)*(float*)pointer;
                 case TypeCode.Double:
                     return (T)(object)*(double*)pointer;
-                default:
-                    throw new ArgumentException("Unsupported Type");
             }
+
+            if (!MarshalType<T>.HasUnmanagedTypes)
+            {
+                T generic = default(T);
+                void* genericPtr = MarshalType<T>.GetPointer(ref generic);
+                Manager.Copy(genericPtr, pointer.ToPointer(), MarshalType<T>.Size);
+                return generic;
+            }
+
+            return (T)Marshal.PtrToStructure(pointer, typeof(T));
         }
 
         public static byte[] GenericTypeToBytes<T>(T generic) where T : struct
         {
+            int size = MarshalType<T>.Size;
+
             switch (MarshalType<T>.TypeCode)
             {
                 case TypeCode.Object:
-                    int size = MarshalType<T>.Size;
-
                     if (MarshalType<T>.IsIntPtr)
                     {
                         switch (size)
@@ -89,32 +66,7 @@ namespace BlueMagic
                                 return BitConverter.GetBytes(((IntPtr)(object)generic).ToInt64());
                         }
                     }
-
-                    byte[] bytes = new byte[size];
-
-                    if (!MarshalType<T>.TypeRequiresMarshal)
-                    {
-                        void* genericPtr = MarshalType<T>.GetPointer(ref generic);
-                        fixed (byte* bytesPtr = bytes)
-                        {
-                            Manager.Copy(bytesPtr, genericPtr, size);
-                            return bytes;
-                        }
-                    }
-
-                    IntPtr ptr = Marshal.AllocHGlobal(size);
-
-                    try
-                    {
-                        Marshal.StructureToPtr(generic, ptr, false);
-                        Marshal.Copy(ptr, bytes, 0, size);
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(ptr);
-                    }
-
-                    return bytes;
+                    break;
                 case TypeCode.Boolean:
                     return BitConverter.GetBytes((bool)(object)generic);
                 case TypeCode.SByte:
@@ -137,13 +89,33 @@ namespace BlueMagic
                     return BitConverter.GetBytes((float)(object)generic);
                 case TypeCode.Double:
                     return BitConverter.GetBytes((double)(object)generic);
-                default:
-                    throw new ArgumentException("Unsupported Type");
             }
+
+            byte[] bytes = new byte[size];
+
+            if (!MarshalType<T>.HasUnmanagedTypes)
+            {
+                void* genericPtr = MarshalType<T>.GetPointer(ref generic);
+                fixed (byte* bytesPtr = bytes)
+                {
+                    Manager.Copy(bytesPtr, genericPtr, size);
+                    return bytes;
+                }
+            }
+
+            using (var memory = new LocalAllocation(size))
+            {
+                memory.Write(generic);
+                bytes = memory.Read();
+            }
+
+            return bytes;
         }
 
         public static T BytesToGenericType<T>(byte[] bytes) where T : struct
         {
+            int size = MarshalType<T>.Size;
+
             switch (MarshalType<T>.TypeCode)
             {
                 case TypeCode.Object:
@@ -152,42 +124,16 @@ namespace BlueMagic
                         switch (bytes.Length)
                         {
                             case 1:
-                                return (T)(object)new IntPtr(bytes[0]);
+                                return (T)(object)new IntPtr(BitConverter.ToInt32(new byte[] { bytes[0], 0, 0, 0 }, 0));
                             case 2:
-                                return (T)(object)new IntPtr(BitConverter.ToInt16(bytes, 0));
+                                return (T)(object)new IntPtr(BitConverter.ToInt32(new byte[] { bytes[0], bytes[1], 0, 0 }, 0));
                             case 4:
                                 return (T)(object)new IntPtr(BitConverter.ToInt32(bytes, 0));
                             case 8:
                                 return (T)(object)new IntPtr(BitConverter.ToInt64(bytes, 0));
                         }
                     }
-
-                    int size = MarshalType<T>.Size;
-                    T generic = default(T);
-
-                    if (!MarshalType<T>.TypeRequiresMarshal)
-                    {
-                        void* genericPtr = MarshalType<T>.GetPointer(ref generic);
-                        fixed (byte* bytesPtr = bytes)
-                        {
-                            Manager.Copy(genericPtr, bytesPtr, size);
-                            return generic;
-                        }
-                    }
-
-                    IntPtr ptr = Marshal.AllocHGlobal(size);
-
-                    try
-                    {
-                        Marshal.Copy(bytes, 0, ptr, size);
-                        generic = (T)Marshal.PtrToStructure(ptr, typeof(T));
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(ptr);
-                    }
-
-                    return generic;
+                    break;
                 case TypeCode.Boolean:
                     return (T)(object)BitConverter.ToBoolean(bytes, 0);
                 case TypeCode.SByte:
@@ -209,9 +155,27 @@ namespace BlueMagic
                     return (T)(object)BitConverter.ToSingle(bytes, 0);
                 case TypeCode.Double:
                     return (T)(object)BitConverter.ToDouble(bytes, 0);
-                default:
-                    throw new ArgumentException("Unsupported Type");
             }
+
+            T generic = default(T);
+
+            if (!MarshalType<T>.HasUnmanagedTypes)
+            {
+                void* genericPtr = MarshalType<T>.GetPointer(ref generic);
+                fixed (byte* bytesPtr = bytes)
+                {
+                    Manager.Copy(genericPtr, bytesPtr, size);
+                    return generic;
+                }
+            }
+
+            using (var memory = new LocalAllocation(size))
+            {
+                memory.Write(bytes);
+                generic = memory.Read<T>();
+            }
+
+            return generic;
         }
     }
 }

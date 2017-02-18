@@ -6,14 +6,14 @@ using System.Runtime.InteropServices;
 
 namespace BlueMagic
 {
-    public static class MarshalType<T>
+    public static class MarshalType<T> where T : struct
     {
         public static Type Type { get; private set; }
         public static TypeCode TypeCode { get; private set; }
         public static int Size { get; private set; }
         public static bool IsIntPtr { get; private set; }
-        public static bool TypeRequiresMarshal { get; private set; }
-        internal unsafe delegate void* GetPointerDelegate(ref T value);
+        public static bool HasUnmanagedTypes { get; private set; }
+        internal unsafe delegate void* GetPointerDelegate(ref T generic);
         internal static readonly GetPointerDelegate GetPointer;
 
         static MarshalType()
@@ -26,17 +26,14 @@ namespace BlueMagic
             Size = Marshal.SizeOf(Type);
             IsIntPtr = Type == typeof(IntPtr);
 
-            TypeRequiresMarshal =
+            HasUnmanagedTypes =
                 Type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Any(
                     m => m.GetCustomAttributes(typeof(MarshalAsAttribute), true).Any());
 
             DynamicMethod method = new DynamicMethod(
-                $"GetPinnedPtr<{Type.FullName.Replace(".", "<>")}>",
+                $"GetPinnedPointer<{Type.FullName.Replace(".", "<>")}>",
                 typeof(void*),
-                new[]
-                {
-                    Type.MakeByRefType()
-                },
+                new[] { Type.MakeByRefType() },
                 typeof(MarshalType<>).Module);
 
             ILGenerator gen = method.GetILGenerator();
