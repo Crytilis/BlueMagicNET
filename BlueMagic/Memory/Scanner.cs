@@ -11,23 +11,24 @@ namespace BlueMagic.Memory
         {
             List<IntPtr> results = new List<IntPtr>();
             int bytesLength = bytes.Length;
-            int bufferLength = buffer.Length;
+            int bufferlength = buffer.Length - bytesLength;
             int i, j, k;
-            bool b;
-            for (i = 0; i <= bufferLength - bytesLength; ++i)
+            bool f;
+
+            for (i = 0; i <= bufferlength; ++i)
             {
                 if (buffer[i] == bytes[0])
                 {
-                    for (j = i, k = 1, b = true; k < bytesLength; ++k, ++i)
+                    for (j = i, k = 1, f = true; k < bytesLength; ++i, ++k)
                     {
                         if (buffer[j + k] != bytes[k])
                         {
-                            b = false;
+                            f = false;
                             break;
                         }
                     }
 
-                    if (b)
+                    if (f)
                         results.Add(new IntPtr(j));
                 }
             }
@@ -46,28 +47,40 @@ namespace BlueMagic.Memory
                 return ScanForBytes(signature.Bytes, buffer);
 
             List<IntPtr> results = new List<IntPtr>();
-            string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
             int signatureLength = signature.String.Length;
-            int bufferLength = bufferString.Length;
-            int i, j, k;
-            bool b;
-            for (i = 0; i <= bufferLength - signatureLength; i += 2)
+            int signatureBytesLength = signatureLength / 2;
+            int bytesLength;
+            int bufferLength = buffer.Length - signatureBytesLength;
+            string s = signature.String;
+            int i, j, k, l, m, x = -1, y, z;
+            bool f;
+            string b;
+
+            for (i = 0; x < 0 && i < signatureLength; i += 2)
+                if (s.Substring(i, 2) != "??")
+                    x = i / 2;
+
+            bytesLength = signatureBytesLength - x;
+
+            for (i = x, y = x * 2, z = y + 1; i <= bufferLength; ++i)
             {
-                if ((signature.String[0] == '?') || bufferString[i] == signature.String[0] &&
-                    (signature.String[1] == '?') || bufferString[i + 1] == signature.String[1])
+                b = buffer[i].ToString("X2");
+
+                if ((s[y] == b[0] && s[z] == b[1]) || (s[y] == '?' && s[z] == '?') || (s[y] == '?' && s[z] == b[1]) || (s[z] == '?' && s[y] == b[0]))
                 {
-                    for (j = i, k = 2, b = true; k < signatureLength; k += 2, i += 2)
+                    for (j = i, k = 1, l = (k * 2) + y, m = l + 1, f = true; k < bytesLength; ++i, ++k, l += 2, m = l + 1)
                     {
-                        if ((signature.String[k] != '?' && bufferString[j + k] != signature.String[k]) ||
-                            (signature.String[k + 1] != '?' && bufferString[j + k + 1] != signature.String[k + 1]))
+                        b = buffer[j + k].ToString("X2");
+
+                        if ((s[l] != '?' && s[l] != b[0]) || (s[m] != '?' && s[m] != b[1]))
                         {
-                            b = false;
+                            f = false;
                             break;
                         }
                     }
 
-                    if (b)
-                        results.Add(new IntPtr(j / 2));
+                    if (f)
+                        results.Add(new IntPtr(j - x));
                 }
             }
 
