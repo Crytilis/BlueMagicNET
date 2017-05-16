@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueMagic", "BlueMagic\BlueMagic.csproj", "{64803769-510C-4179-9CCD-F60A7D334BF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueMagicTests", "BlueMagicTests\BlueMagicTests.csproj", "{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{64803769-510C-4179-9CCD-F60A7D334BF5}.Release|x64.Build.0 = Release|x64
 		{64803769-510C-4179-9CCD-F60A7D334BF5}.Release|x86.ActiveCfg = Release|x86
 		{64803769-510C-4179-9CCD-F60A7D334BF5}.Release|x86.Build.0 = Release|x86
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Debug|x64.ActiveCfg = Debug|x64
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Debug|x64.Build.0 = Debug|x64
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Debug|x86.ActiveCfg = Debug|x86
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Debug|x86.Build.0 = Debug|x86
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Release|x64.ActiveCfg = Release|x64
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Release|x64.Build.0 = Release|x64
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Release|x86.ActiveCfg = Release|x86
+		{E9018321-EC1A-4A32-AFEB-CB588FFEFD22}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
