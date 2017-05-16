@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="MarshalType.cs" />
     <Compile Include="Memory\Manager.cs" />
+    <Compile Include="Memory\Pointer.cs" />
     <Compile Include="Memory\Signature.cs" />
     <Compile Include="Memory\Literate.cs" />
     <Compile Include="Memory\RemoteAllocation.cs" />
