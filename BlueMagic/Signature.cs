@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
     public class Signature : IDisposable
     {

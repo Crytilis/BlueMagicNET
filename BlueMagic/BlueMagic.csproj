@@ -68,15 +68,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarshalType.cs" />
-    <Compile Include="Memory\Manager.cs" />
-    <Compile Include="Memory\Pointer.cs" />
-    <Compile Include="Memory\Signature.cs" />
-    <Compile Include="Memory\Literate.cs" />
-    <Compile Include="Memory\RemoteAllocation.cs" />
-    <Compile Include="Memory\Protection.cs" />
-    <Compile Include="Memory\Regions.cs" />
-    <Compile Include="Memory\Scanner.cs" />
-    <Compile Include="Memory\LocalAllocation.cs" />
+    <Compile Include="MemoryManager.cs" />
+    <Compile Include="Pointer.cs" />
+    <Compile Include="Signature.cs" />
+    <Compile Include="MemoryLiterate.cs" />
+    <Compile Include="RemoteAllocation.cs" />
+    <Compile Include="MemoryProtection.cs" />
+    <Compile Include="MemoryRegions.cs" />
+    <Compile Include="MemoryScanner.cs" />
+    <Compile Include="LocalAllocation.cs" />
     <Compile Include="Native\Enumerations.cs" />
     <Compile Include="Native\Imports.cs" />
     <Compile Include="Native\Methods.cs" />

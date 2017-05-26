@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace BlueMagic.Native
+namespace BlueMagic
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct MemoryBasicInformation

@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace BlueMagic.Native
+namespace BlueMagic
 {
     [Flags]
-    public enum AccessFlags
+    public enum ProcessAccessRights
     {
         DELETE = 0x00010000,
         READ_CONTROL = 0x00020000,
@@ -24,6 +24,17 @@ namespace BlueMagic.Native
         PROCESS_SUSPEND_RESUME = 0x0800,
         PROCESS_QUERY_LIMITED_INFORMATION = 0x1000,
         PROCESS_ALL_ACCESS = STANDARD_RIGHTS_ALL | SYNCHRONIZE | 0xFFF,
+    }
+
+    [Flags]
+    public enum ThreadAccessRights
+    {
+        DELETE = 0x00010000,
+        READ_CONTROL = 0x00020000,
+        WRITE_DAC = 0x00040000,
+        WRITE_OWNER = 0x00080000,
+        SYNCHRONIZE = 0x00100000,
+        STANDARD_RIGHTS_ALL = 0x000F0000,
         THREAD_TERMINATE = 0x0001,
         THREAD_SUSPEND_RESUME = 0x0002,
         THREAD_GET_CONTEXT = 0x0008,

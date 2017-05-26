@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
     public class Pointer : IDisposable
     {

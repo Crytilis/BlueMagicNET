@@ -3,16 +3,16 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace BlueMagic.Native
+namespace BlueMagic
 {
-    public static unsafe class Methods
+    public static unsafe class NativeMethods
     {
-        public static SafeMemoryHandle OpenProcess(int pId, AccessFlags accessFlags = AccessFlags.PROCESS_ALL_ACCESS)
+        public static SafeMemoryHandle OpenProcess(int pId, ProcessAccessRights accessRights = ProcessAccessRights.PROCESS_ALL_ACCESS)
         {
-            SafeMemoryHandle processHandle = Imports.OpenProcess(accessFlags, false, pId);
+            SafeMemoryHandle processHandle = Imports.OpenProcess(accessRights, false, pId);
             if (processHandle == null || processHandle.IsInvalid || processHandle.IsClosed)
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to open process {1} with access {2}",
-                    Marshal.GetLastWin32Error(), pId, accessFlags.ToString("X")));
+                    Marshal.GetLastWin32Error(), pId, accessRights.ToString("X")));
             return processHandle;
         }
 

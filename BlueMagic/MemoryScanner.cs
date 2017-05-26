@@ -1,11 +1,10 @@
-using BlueMagic.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
-    public static class Scanner
+    public static class MemoryScanner
     {
         public static List<IntPtr> ScanForBytes(byte[] bytes, byte[] buffer)
         {
@@ -90,7 +89,7 @@ namespace BlueMagic.Memory
         public static List<IntPtr> ScanRegionForBytes(SafeMemoryHandle processHandle, byte[] bytes, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForBytes(bytes, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForBytes(bytes, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -100,7 +99,7 @@ namespace BlueMagic.Memory
         public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, MemoryBasicInformation region) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForGeneric(value, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForGeneric(value, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -110,7 +109,7 @@ namespace BlueMagic.Memory
         public static List<IntPtr> ScanRegionForSignature(SafeMemoryHandle processHandle, Signature signature, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForSignature(signature, Literate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForSignature(signature, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -146,17 +145,17 @@ namespace BlueMagic.Memory
 
         public static List<IntPtr> ScanModuleForBytes(Process process, SafeMemoryHandle processHandle, byte[] bytes, ProcessModule module)
         {
-            return ScanRegionsForBytes(processHandle, bytes, Regions.Load(process, processHandle, module));
+            return ScanRegionsForBytes(processHandle, bytes, MemoryRegions.Load(process, processHandle, module));
         }
 
         public static List<IntPtr> ScanModuleForGeneric<T>(Process process, SafeMemoryHandle processHandle, T value, ProcessModule module) where T : struct
         {
-            return ScanRegionsForGeneric(processHandle, value, Regions.Load(process, processHandle, module));
+            return ScanRegionsForGeneric(processHandle, value, MemoryRegions.Load(process, processHandle, module));
         }
 
         public static List<IntPtr> ScanModuleForSignature(Process process, SafeMemoryHandle processHandle, Signature signature, ProcessModule module)
         {
-            return ScanRegionsForSignature(processHandle, signature, Regions.Load(process, processHandle, module));
+            return ScanRegionsForSignature(processHandle, signature, MemoryRegions.Load(process, processHandle, module));
         }
 
         public static List<IntPtr> ScanAllModulesForBytes(Process process, SafeMemoryHandle processHandle, byte[] bytes)
@@ -191,7 +190,7 @@ namespace BlueMagic.Memory
 
         public static IntPtr RescanForBytes(SafeMemoryHandle processHandle, byte[] bytes, IntPtr address)
         {
-            if (Literate.Read(processHandle, address, bytes.Length) == bytes)
+            if (MemoryLiterate.Read(processHandle, address, bytes.Length) == bytes)
                 return address;
 
             return IntPtr.Zero;
@@ -207,7 +206,7 @@ namespace BlueMagic.Memory
             if (signature.Bytes != null)
                 return RescanForBytes(processHandle, signature.Bytes, address);
 
-            byte[] buffer = Literate.Read(processHandle, address, signature.String.Length / 2);
+            byte[] buffer = MemoryLiterate.Read(processHandle, address, signature.String.Length / 2);
             string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
             int bufferLength = bufferString.Length;
 

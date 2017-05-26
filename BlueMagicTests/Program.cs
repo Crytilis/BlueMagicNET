@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using BlueMagic;
-using BlueMagic.Native;
-using BlueMagic.Memory;
 
 namespace BlueMagicTests
 {

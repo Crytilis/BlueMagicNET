@@ -1,5 +1,4 @@
-﻿using BlueMagic.Native;
-using System;
+﻿using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security;
 using System.Security.Permissions;

@@ -1,15 +1,14 @@
-﻿using BlueMagic.Native;
-using System;
+﻿using System;
 using System.Text;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
-    public static class Literate
+    public static class MemoryLiterate
     {
         public static byte[] Read(SafeMemoryHandle processHandle, IntPtr address, int size)
         {
             byte[] buffer = new byte[size];
-            Methods.ReadProcessMemory(processHandle, address, buffer, size);
+            NativeMethods.ReadProcessMemory(processHandle, address, buffer, size);
             return buffer;
         }
 
@@ -20,24 +19,24 @@ namespace BlueMagic.Memory
             if (pointer.Offsets.Count == 0)
             {
                 buffer = new byte[size];
-                Methods.ReadProcessMemory(processHandle, pointer.BaseAddress, buffer, size);
+                NativeMethods.ReadProcessMemory(processHandle, pointer.BaseAddress, buffer, size);
                 return buffer;
             }
 
             int addressSize = MarshalType<IntPtr>.Size;
             buffer = new byte[addressSize];
-            Methods.ReadProcessMemory(processHandle, pointer.BaseAddress, buffer, addressSize);
+            NativeMethods.ReadProcessMemory(processHandle, pointer.BaseAddress, buffer, addressSize);
             IntPtr address = TypeConverter.BytesToGenericType<IntPtr>(buffer);
             int offsetsCount = pointer.Offsets.Count - 1;
 
             for (int i = 0; i < offsetsCount; ++i)
             {
-                Methods.ReadProcessMemory(processHandle, address + pointer.Offsets[i], buffer, addressSize);
+                NativeMethods.ReadProcessMemory(processHandle, address + pointer.Offsets[i], buffer, addressSize);
                 address = TypeConverter.BytesToGenericType<IntPtr>(buffer);
             }
 
             buffer = new byte[size];
-            Methods.ReadProcessMemory(processHandle, address + pointer.Offsets[offsetsCount], buffer, size);
+            NativeMethods.ReadProcessMemory(processHandle, address + pointer.Offsets[offsetsCount], buffer, size);
             return buffer;
         }
 
@@ -73,15 +72,15 @@ namespace BlueMagic.Memory
 
         public static bool Write(SafeMemoryHandle processHandle, IntPtr address, byte[] bytes)
         {
-            using (new Protection(processHandle, address, bytes.Length))
-                return Methods.WriteProcessMemory(processHandle, address, bytes, bytes.Length) == bytes.Length;
+            using (new MemoryProtection(processHandle, address, bytes.Length))
+                return NativeMethods.WriteProcessMemory(processHandle, address, bytes, bytes.Length) == bytes.Length;
         }
 
         public static bool Write(SafeMemoryHandle processHandle, Pointer pointer, byte[] bytes)
         {
             if (pointer.Offsets.Count == 0)
-                using (new Protection(processHandle, pointer.BaseAddress, bytes.Length))
-                    return Methods.WriteProcessMemory(processHandle, pointer.BaseAddress, bytes, bytes.Length) == bytes.Length;
+                using (new MemoryProtection(processHandle, pointer.BaseAddress, bytes.Length))
+                    return NativeMethods.WriteProcessMemory(processHandle, pointer.BaseAddress, bytes, bytes.Length) == bytes.Length;
 
             int addressSize = MarshalType<IntPtr>.Size;
             IntPtr address = TypeConverter.BytesToGenericType<IntPtr>(Read(processHandle, pointer.BaseAddress, addressSize));
@@ -91,8 +90,8 @@ namespace BlueMagic.Memory
                 address = TypeConverter.BytesToGenericType<IntPtr>(Read(processHandle, address + pointer.Offsets[i], addressSize));
 
             address += pointer.Offsets[offsetsCount];
-            using (new Protection(processHandle, address, bytes.Length))
-                return Methods.WriteProcessMemory(processHandle, address, bytes, bytes.Length) == bytes.Length;
+            using (new MemoryProtection(processHandle, address, bytes.Length))
+                return NativeMethods.WriteProcessMemory(processHandle, address, bytes, bytes.Length) == bytes.Length;
         }
 
         public static bool Write<T>(SafeMemoryHandle processHandle, IntPtr address, T value) where T : struct

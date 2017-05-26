@@ -2,13 +2,13 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace BlueMagic.Native
+namespace BlueMagic
 {
     internal unsafe class Imports
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern SafeMemoryHandle OpenProcess(
-            AccessFlags dwDesiredAccess,
+            ProcessAccessRights dwDesiredAccess,
             [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle,
             int dwProcessId);
 
@@ -51,7 +51,7 @@ namespace BlueMagic.Native
             int nSize,
             out int iBytesWritten);
 
-        [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
+        [DllImport("kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = true)]
         internal static extern void MoveMemory(
             void* destination,
             void* source,

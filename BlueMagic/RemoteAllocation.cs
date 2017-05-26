@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
     public class RemoteAllocation : IDisposable
     {
@@ -13,14 +13,14 @@ namespace BlueMagic.Memory
         {
             Size = size;
             ProcessHandle = null;
-            AllocationBase = Manager.Allocate(Size, address);
+            AllocationBase = MemoryManager.Allocate(Size, address);
         }
 
         public RemoteAllocation(int size, SafeMemoryHandle processHandle, [Optional] IntPtr address)
         {
             Size = size;
             ProcessHandle = processHandle;
-            AllocationBase = Manager.Allocate(Size, ProcessHandle, address);
+            AllocationBase = MemoryManager.Allocate(Size, ProcessHandle, address);
         }
 
         ~RemoteAllocation()
@@ -31,9 +31,9 @@ namespace BlueMagic.Memory
         public void Dispose()
         {
             if (ProcessHandle == null)
-                Manager.Free(AllocationBase);
+                MemoryManager.Free(AllocationBase);
             else
-                Manager.Free(ProcessHandle, AllocationBase);
+                MemoryManager.Free(ProcessHandle, AllocationBase);
 
             ProcessHandle = null;
             AllocationBase = IntPtr.Zero;

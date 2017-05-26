@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
     public class LocalAllocation : IDisposable
     {

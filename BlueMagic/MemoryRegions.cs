@@ -1,12 +1,11 @@
-﻿using BlueMagic.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace BlueMagic.Memory
+namespace BlueMagic
 {
-    public static class Regions
+    public static class MemoryRegions
     {
         private static List<MemoryBasicInformation> Scan(SafeMemoryHandle processHandle, ProcessModule[] processModules, int moduleIndex, int endModule)
         {
@@ -20,7 +19,7 @@ namespace BlueMagic.Memory
 
                 do
                 {
-                    MemoryBasicInformation region = Methods.Query(processHandle, new IntPtr(seek), MarshalType<MemoryBasicInformation>.Size);
+                    MemoryBasicInformation region = NativeMethods.Query(processHandle, new IntPtr(seek), MarshalType<MemoryBasicInformation>.Size);
                     if ((region.State & MemoryAllocationState.MEM_COMMIT) != 0 && (region.Protect & (MemoryProtectionType)0x701) == 0)
                         regions.Add(region);
 
