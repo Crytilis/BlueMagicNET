@@ -56,7 +56,7 @@ namespace BlueMagic
             int bytesRead = 0;
             if (!Imports.ReadProcessMemory(processHandle, address, buffer, size, out bytesRead))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to read memory from 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size));
             return bytesRead;
         }
 
@@ -65,7 +65,7 @@ namespace BlueMagic
             int bytesWritten = 0;
             if (!Imports.WriteProcessMemory(processHandle, address, buffer, size, out bytesWritten))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to write memory at 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size));
             return bytesWritten;
         }
 
@@ -74,7 +74,7 @@ namespace BlueMagic
             IntPtr ret = Imports.VirtualAlloc(address, size, MemoryAllocationState.MEM_COMMIT, protect);
             if (ret.Equals(0))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to allocate memory at 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size));
             return ret;
         }
 
@@ -83,7 +83,7 @@ namespace BlueMagic
             IntPtr ret = Imports.VirtualAllocEx(processHandle, address, size, MemoryAllocationState.MEM_COMMIT, protect);
             if (ret.Equals(0))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to allocate memory to process handle 0x{1} at 0x{2}[Size: {3}]",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString($"X{IntPtr.Size}"), size));
             return ret;
         }
 
@@ -91,7 +91,7 @@ namespace BlueMagic
         {
             if (!Imports.VirtualFree(address, size, free))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to free memory at 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size));
             return true;
         }
 
@@ -99,7 +99,7 @@ namespace BlueMagic
         {
             if (!Imports.VirtualFreeEx(processHandle, address, size, free))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to free memory from process handle 0x{1} at 0x{2}[Size: {3}]",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString($"X{IntPtr.Size}"), size));
             return true;
         }
 
@@ -112,7 +112,7 @@ namespace BlueMagic
             catch
             {
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to copy memory to {0} from {1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), (*(ulong*)(destination)).ToString("X8"), (*(ulong*)(source)).ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), (*(ulong*)(destination)).ToString($"X{IntPtr.Size}"), (*(ulong*)(source)).ToString($"X{IntPtr.Size}"), size));
             }
         }
 
@@ -121,7 +121,7 @@ namespace BlueMagic
             MemoryProtectionType oldProtect;
             if (!Imports.VirtualProtect(address, size, newProtect, out oldProtect))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to change memory protection at 0x{1}[Size: {2}] to {3}",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size, newProtect.ToString("X")));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size, newProtect.ToString("X")));
             return oldProtect;
         }
 
@@ -130,7 +130,7 @@ namespace BlueMagic
             MemoryProtectionType oldProtect;
             if (!Imports.VirtualProtectEx(processHandle, address, size, newProtect, out oldProtect))
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to change memory protection of process handle 0x{1} at 0x{2}[Size: {3}] to {4}",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size, newProtect.ToString("X")));
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString($"X{IntPtr.Size}"), size, newProtect.ToString("X")));
             return oldProtect;
         }
 
@@ -139,7 +139,7 @@ namespace BlueMagic
             MemoryBasicInformation memInfo;
             if (Imports.VirtualQuery(address, out memInfo, size) == 0)
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to retrieve memory information from 0x{1}[Size: {2}]",
-                    Marshal.GetLastWin32Error(), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), address.ToString($"X{IntPtr.Size}"), size));
             return memInfo;
         }
 
@@ -148,7 +148,7 @@ namespace BlueMagic
             MemoryBasicInformation memInfo;
             if (Imports.VirtualQueryEx(processHandle, address, out memInfo, size) == 0)
                 throw new Win32Exception(string.Format("[Error Code: {0}] Unable to retrieve memory information of process handle 0x{1} from 0x{2}[Size: {3}]",
-                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
+                    Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString($"X{IntPtr.Size}"), size));
             return memInfo;
         }
     }
