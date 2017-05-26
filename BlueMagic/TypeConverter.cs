@@ -42,7 +42,7 @@ namespace BlueMagic
             {
                 T generic = default(T);
                 void* genericPtr = MarshalType<T>.GetPointer(ref generic);
-                MemoryManager.Copy(genericPtr, pointer.ToPointer(), MarshalType<T>.Size);
+                NativeMethods.Copy(genericPtr, pointer.ToPointer(), MarshalType<T>.Size);
                 return generic;
             }
 
@@ -98,7 +98,7 @@ namespace BlueMagic
                 void* genericPtr = MarshalType<T>.GetPointer(ref generic);
                 fixed (byte* bytesPtr = bytes)
                 {
-                    MemoryManager.Copy(bytesPtr, genericPtr, size);
+                    NativeMethods.Copy(bytesPtr, genericPtr, size);
                     return bytes;
                 }
             }
@@ -164,7 +164,7 @@ namespace BlueMagic
                 void* genericPtr = MarshalType<T>.GetPointer(ref generic);
                 fixed (byte* bytesPtr = bytes)
                 {
-                    MemoryManager.Copy(genericPtr, bytesPtr, size);
+                    NativeMethods.Copy(genericPtr, bytesPtr, size);
                     return generic;
                 }
             }

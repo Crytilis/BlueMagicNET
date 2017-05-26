@@ -13,14 +13,14 @@ namespace BlueMagic
         {
             Size = size;
             ProcessHandle = null;
-            AllocationBase = MemoryManager.Allocate(Size, address);
+            AllocationBase = NativeMethods.Allocate(address, Size);
         }
 
         public RemoteAllocation(int size, SafeMemoryHandle processHandle, [Optional] IntPtr address)
         {
             Size = size;
             ProcessHandle = processHandle;
-            AllocationBase = MemoryManager.Allocate(Size, ProcessHandle, address);
+            AllocationBase = NativeMethods.Allocate(ProcessHandle, address, Size);
         }
 
         ~RemoteAllocation()
@@ -31,9 +31,9 @@ namespace BlueMagic
         public void Dispose()
         {
             if (ProcessHandle == null)
-                MemoryManager.Free(AllocationBase);
+                NativeMethods.Free(AllocationBase);
             else
-                MemoryManager.Free(ProcessHandle, AllocationBase);
+                NativeMethods.Free(ProcessHandle, AllocationBase);
 
             ProcessHandle = null;
             AllocationBase = IntPtr.Zero;

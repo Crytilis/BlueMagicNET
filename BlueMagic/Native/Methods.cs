@@ -69,41 +69,54 @@ namespace BlueMagic
             return bytesWritten;
         }
 
-        public static IntPtr Allocate([Optional] IntPtr address, int size, MemoryProtectionType protect)
+        public static IntPtr Allocate([Optional] IntPtr address, int size, MemoryProtectionType protect = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             IntPtr ret = Imports.VirtualAlloc(address, size, MemoryAllocationState.MEM_COMMIT, protect);
             if (ret.Equals(0))
-                throw new Win32Exception(string.Format("[Error Code: {0}] Unable allocate memory at 0x{1}[Size: {2}]",
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to allocate memory at 0x{1}[Size: {2}]",
                     Marshal.GetLastWin32Error(), address.ToString("X8"), size));
             return ret;
         }
 
-        public static IntPtr Allocate(SafeMemoryHandle processHandle, [Optional] IntPtr address, int size, MemoryProtectionType protect)
+        public static IntPtr Allocate(SafeMemoryHandle processHandle, [Optional] IntPtr address, int size, MemoryProtectionType protect = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             IntPtr ret = Imports.VirtualAllocEx(processHandle, address, size, MemoryAllocationState.MEM_COMMIT, protect);
             if (ret.Equals(0))
-                throw new Win32Exception(string.Format("[Error Code: {0}] Unable allocate memory to process handle 0x{1} at 0x{2}[Size: {3}]",
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to allocate memory to process handle 0x{1} at 0x{2}[Size: {3}]",
                     Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
             return ret;
         }
 
-        public static bool Free(IntPtr address, int size, MemoryFreeType free)
+        public static bool Free(IntPtr address, int size = 0, MemoryFreeType free = MemoryFreeType.MEM_RELEASE)
         {
             if (!Imports.VirtualFree(address, size, free))
-                throw new Win32Exception(string.Format("[Error Code: {0}] Unable free memory at 0x{1}[Size: {2}]",
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to free memory at 0x{1}[Size: {2}]",
                     Marshal.GetLastWin32Error(), address.ToString("X8"), size));
             return true;
         }
 
-        public static bool Free(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryFreeType free)
+        public static bool Free(SafeMemoryHandle processHandle, IntPtr address, int size = 0, MemoryFreeType free = MemoryFreeType.MEM_RELEASE)
         {
             if (!Imports.VirtualFreeEx(processHandle, address, size, free))
-                throw new Win32Exception(string.Format("[Error Code: {0}] Unable free memory from process handle 0x{1} at 0x{2}[Size: {3}]",
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to free memory from process handle 0x{1} at 0x{2}[Size: {3}]",
                     Marshal.GetLastWin32Error(), processHandle.DangerousGetHandle().ToString("X"), address.ToString("X8"), size));
             return true;
         }
 
-        public static MemoryProtectionType ChangeMemoryProtection(IntPtr address, int size, MemoryProtectionType newProtect)
+        public static void Copy(void* destination, void* source, int size)
+        {
+            try
+            {
+                Imports.MoveMemory(destination, source, size);
+            }
+            catch
+            {
+                throw new Win32Exception(string.Format("[Error Code: {0}] Unable to copy memory to {0} from {1}[Size: {2}]",
+                    Marshal.GetLastWin32Error(), (*(ulong*)(destination)).ToString("X8"), (*(ulong*)(source)).ToString("X8"), size));
+            }
+        }
+
+        public static MemoryProtectionType ChangeMemoryProtection(IntPtr address, int size, MemoryProtectionType newProtect = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             MemoryProtectionType oldProtect;
             if (!Imports.VirtualProtect(address, size, newProtect, out oldProtect))
@@ -112,7 +125,7 @@ namespace BlueMagic
             return oldProtect;
         }
 
-        public static MemoryProtectionType ChangeMemoryProtection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType newProtect)
+        public static MemoryProtectionType ChangeMemoryProtection(SafeMemoryHandle processHandle, IntPtr address, int size, MemoryProtectionType newProtect = MemoryProtectionType.PAGE_EXECUTE_READWRITE)
         {
             MemoryProtectionType oldProtect;
             if (!Imports.VirtualProtectEx(processHandle, address, size, newProtect, out oldProtect))
