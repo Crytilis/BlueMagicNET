@@ -46,20 +46,19 @@ namespace BlueMagic
                 return ScanForBytes(signature.Bytes, buffer);
 
             List<IntPtr> results = new List<IntPtr>();
-            int signatureLength = signature.String.Length;
-            int signatureBytesLength = signatureLength / 2;
-            int bytesLength;
+            int signatureStringLength = signature.String.Length;
+            int signatureBytesLength = signatureStringLength / 2;
             int bufferLength = buffer.Length - signatureBytesLength;
             string s = signature.String;
             int i, j, k, l, m, x = -1, y, z;
             bool f;
             string b;
 
-            for (i = 0; x < 0 && i < signatureLength; i += 2)
+            for (i = 0; x < 0 && i < signatureStringLength; i += 2)
                 if (s.Substring(i, 2) != "??")
                     x = i / 2;
 
-            bytesLength = signatureBytesLength - x;
+            int bytesLength = signatureBytesLength - x;
 
             for (i = x, y = x * 2, z = y + 1; i <= bufferLength; ++i)
             {
@@ -89,7 +88,7 @@ namespace BlueMagic
         public static List<IntPtr> ScanRegionForBytes(SafeMemoryHandle processHandle, byte[] bytes, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForBytes(bytes, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForBytes(bytes, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize.ToInt32()));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -99,7 +98,7 @@ namespace BlueMagic
         public static List<IntPtr> ScanRegionForGeneric<T>(SafeMemoryHandle processHandle, T value, MemoryBasicInformation region) where T : struct
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForGeneric(value, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForGeneric(value, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize.ToInt32()));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -109,7 +108,7 @@ namespace BlueMagic
         public static List<IntPtr> ScanRegionForSignature(SafeMemoryHandle processHandle, Signature signature, MemoryBasicInformation region)
         {
             List<IntPtr> results = new List<IntPtr>();
-            List<IntPtr> addresses = ScanForSignature(signature, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize));
+            List<IntPtr> addresses = ScanForSignature(signature, MemoryLiterate.Read(processHandle, region.BaseAddress, region.RegionSize.ToInt32()));
             foreach (IntPtr address in addresses)
                 results.Add(new IntPtr(region.BaseAddress.ToInt64() + address.ToInt64()));
 
@@ -206,14 +205,24 @@ namespace BlueMagic
             if (signature.Bytes != null)
                 return RescanForBytes(processHandle, signature.Bytes, address);
 
+            int signatureLength = signature.String.Length;
+            int signatureBytesLength = signatureLength / 2;
             byte[] buffer = MemoryLiterate.Read(processHandle, address, signature.String.Length / 2);
-            string bufferString = BitConverter.ToString(buffer).Replace("-", string.Empty);
-            int bufferLength = bufferString.Length;
+            string s = signature.String;
+            int i, j = -1;
+            string b;
 
-            for (int i = 0; i < bufferLength; i += 2)
+            for (i = 0; j < 0 && i < signatureLength; i += 2)
+                if (s.Substring(i, 2) != "??")
+                    j = i / 2;
+
+            int bytesLength = signatureBytesLength - j;
+
+            for (i = j, j = i + 1; i < bytesLength; ++i, ++j)
             {
-                if ((signature.String[i] != '?' && bufferString[i] != signature.String[i]) ||
-                    (signature.String[i + 1] != '?' && bufferString[i + 1] != signature.String[i + 1]))
+                b = buffer[i].ToString("X2");
+
+                if ((s[i] != '?' && s[i] != b[0]) || (s[j] != '?' && s[j] != b[1]))
                     return IntPtr.Zero;
             }
 

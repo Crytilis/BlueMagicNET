@@ -9,7 +9,7 @@ namespace BlueMagic
         public IntPtr BaseAddress;
         public IntPtr AllocationBase;
         public MemoryProtectionType AllocationProtect;
-        public int RegionSize;
+        public IntPtr RegionSize;
         public MemoryAllocationState State;
         public MemoryProtectionType Protect;
         public MemoryAllocationType Type;

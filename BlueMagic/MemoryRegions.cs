@@ -23,7 +23,7 @@ namespace BlueMagic
                     if ((region.State & MemoryAllocationState.MEM_COMMIT) != 0 && (region.Protect & (MemoryProtectionType)0x701) == 0)
                         regions.Add(region);
 
-                    seek = region.BaseAddress.ToInt64() + region.RegionSize;
+                    seek = region.BaseAddress.ToInt64() + region.RegionSize.ToInt64();
                 }
                 while (seek < end);
             }
